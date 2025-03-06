@@ -6,8 +6,10 @@ import lombok.*;
 
 @Entity
 @Data // Lombok annotation to generate Getters, Setters, toString, equals, and hashCode
-@NoArgsConstructor // Generates a no-args constructor
-@AllArgsConstructor // Generates an all-args constructor
+//@Getter // Generates all getters
+//@Setter // Generates all setters
+//@NoArgsConstructor // Generates a no-args constructor
+//@AllArgsConstructor // Generates an all-args constructor
 public class Employee {
 
     @Id
@@ -54,4 +56,15 @@ public class Employee {
     public void setSalary(@Min(value = 10000, message = "Salary must be at least 10,000") double salary) {
         this.salary = salary;
     }
+
+    public Employee(Long id, String name, String department, double salary) {
+        this.id = id;
+        this.name = name;
+        this.department = department;
+        this.salary = salary;
+    }
+
+    public Employee() {
+    }
+
 }
