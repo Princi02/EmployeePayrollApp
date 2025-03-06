@@ -31,6 +31,7 @@ public class EmployeeController {
         Employee employee = new Employee();
         employee.setName(employeeDTO.getName());
         employee.setSalary(employeeDTO.getSalary());
+        employee.setDepartment("null");
 
         Employee savedEmployee = employeeRepository.save(employee);
         return ResponseEntity.ok(savedEmployee);
@@ -51,6 +52,7 @@ public class EmployeeController {
                 .map(employee -> {
                     employee.setName(employeeDTO.getName());
                     employee.setSalary(employeeDTO.getSalary());
+                    employee.setDepartment("null");
                     return ResponseEntity.ok(employeeRepository.save(employee));
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
