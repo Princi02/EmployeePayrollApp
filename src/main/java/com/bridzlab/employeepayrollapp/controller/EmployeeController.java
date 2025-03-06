@@ -1,7 +1,9 @@
 package com.bridzlab.employeepayrollapp.controller;
 
+import com.bridzlab.employeepayrollapp.dto.EmployeeDTO;
 import com.bridzlab.employeepayrollapp.model.Employee;
 import com.bridzlab.employeepayrollapp.repository.EmployeeRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +19,19 @@ public class EmployeeController {
     private EmployeeRepository employeeRepository;
 
     // GET: Retrieve all employees
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
         return ResponseEntity.ok(employees);
     }
 
     // POST: Create a new employee
-    @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+    @PostMapping("/create")
+    public ResponseEntity<Employee> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        employee.setName(employeeDTO.getName());
+        employee.setSalary(employeeDTO.getSalary());
+
         Employee savedEmployee = employeeRepository.save(employee);
         return ResponseEntity.ok(savedEmployee);
     }
@@ -40,20 +46,14 @@ public class EmployeeController {
 
     // PUT: Update employee details
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
-        Optional<Employee> existingEmployee = employeeRepository.findById(id);
-
-        if (existingEmployee.isPresent()) {
-            Employee employee = existingEmployee.get();
-            employee.setName(employeeDetails.getName());
-            employee.setDepartment(employeeDetails.getDepartment());
-            employee.setSalary(employeeDetails.getSalary());
-
-            Employee updatedEmployee = employeeRepository.save(employee);
-            return ResponseEntity.ok(updatedEmployee);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employeeDTO) {
+        return employeeRepository.findById(id)
+                .map(employee -> {
+                    employee.setName(employeeDTO.getName());
+                    employee.setSalary(employeeDTO.getSalary());
+                    return ResponseEntity.ok(employeeRepository.save(employee));
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // DELETE: Delete employee by ID
