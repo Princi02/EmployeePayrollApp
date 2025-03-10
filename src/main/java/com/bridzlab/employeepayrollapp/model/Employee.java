@@ -15,7 +15,10 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    Ensures validation at the database level
     @NotBlank(message = "Name is required")
+    @Pattern(regexp = "^[A-Z][a-zA-Z\\s]{2,}$", message = "Name must start with a capital letter and have at least 3 characters")
+    @Column(nullable = false, length = 50)
     private String name;
 
 
