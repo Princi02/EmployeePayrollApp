@@ -1,6 +1,7 @@
 package com.bridzlab.employeepayrollapp.service;
 
 import com.bridzlab.employeepayrollapp.dto.EmployeeDTO;
+import com.bridzlab.employeepayrollapp.exception.EmployeeNotFoundException;
 import com.bridzlab.employeepayrollapp.model.Employee;
 import com.bridzlab.employeepayrollapp.repository.EmployeeRepository;
 import jakarta.annotation.PostConstruct;
@@ -32,7 +33,12 @@ public class EmployeeService {
 
     // Get employee by ID
     public Optional<Employee> getEmployeeById(Long id) {
-        return employeeList.stream().filter(emp -> emp.getId().equals(id)).findFirst();
+        return employeeList.stream()
+                .filter(emp -> emp.getId().equals(id))
+                .findFirst()
+                .or(() -> {
+                    throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
+                });
     }
 
     // Create employee
@@ -56,22 +62,21 @@ public class EmployeeService {
             employee.setSalary(employeeDTO.getSalary());
             employee.setDepartment("null");
 
-            Employee updatedEmployee = employeeRepository.save(employee); // Update in DB
+            Employee updatedEmployee = employeeRepository.save(employee);
 
-            // Update in List
             employeeList.removeIf(emp -> emp.getId().equals(id));
             employeeList.add(updatedEmployee);
-
             return updatedEmployee;
         }
-        return null;
+        throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
     }
 
     // Delete employee
     public void deleteEmployee(Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id); // Delete from DB
-            employeeList.removeIf(emp -> emp.getId().equals(id)); // Remove from List
+        if (!employeeRepository.existsById(id)) {
+            throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
         }
+        employeeRepository.deleteById(id);
+        employeeList.removeIf(emp -> emp.getId().equals(id));
     }
 }
